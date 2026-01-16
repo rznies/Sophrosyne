@@ -8,12 +8,9 @@ class SessionManager {
   private val scope = CoroutineScope(Dispatchers.Main + Job())
 
   fun startSession(packageName: String, durationMs: Long, intentText: String) {
-    Log.d("IntentGate", "Starting session: $packageName for ${durationMs / 1000}s")
-    
     sessionJob?.cancel()
     sessionJob = scope.launch {
       delay(durationMs)
-      Log.d("IntentGate", "Session expired: $packageName")
       // TODO: Emit onSessionEnd event, re-show gate
     }
   }

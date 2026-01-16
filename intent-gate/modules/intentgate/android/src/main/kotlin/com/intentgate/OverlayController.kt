@@ -15,7 +15,6 @@ object OverlayController {
   fun showGate(context: Context, packageName: String) {
     if (overlayView != null) return
     
-    Log.d("IntentGate", "Showing gate for: $packageName")
     try {
       overlayView = GateOverlayView(context, packageName)
       windowManager?.addView(overlayView, getLayoutParams())

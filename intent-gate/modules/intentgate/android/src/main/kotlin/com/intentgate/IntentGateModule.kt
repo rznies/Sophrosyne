@@ -15,7 +15,6 @@ class IntentGateModule : Module() {
     }
     
     Function("startService") { promise ->
-      Log.d("IntentGate", "Service start requested")
       promise.resolve(null)
     }
     
@@ -33,8 +32,17 @@ class IntentGateModule : Module() {
     }
     
     Function("allowSession") { packageName: String, durationMs: Long, intent: String, promise ->
-      sessionManager.startSession(packageName, durationMs, intent)
-      promise.resolve(true)
+      try {
+        if (intent.trim().length < 3) {
+          promise.reject("INVALID_INTENT", "Intent must be 3+ characters")
+          return@Function
+        }
+        sessionManager.startSession(packageName, durationMs, intent)
+        promise.resolve(true)
+      } catch (e: Exception) {
+        Log.e("IntentGate", "allowSession failed", e)
+        promise.reject("SESSION_SAVE_FAILED", e.message)
+      }
     }
     
     Function("getTodayStats") { promise ->

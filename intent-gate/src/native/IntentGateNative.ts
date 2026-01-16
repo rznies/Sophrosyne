@@ -25,7 +25,6 @@ export function useIntentGateEvents() {
     const interceptSubscription = addIntentGateEventListener(
       "onIntercept",
       (event) => {
-        console.log("Gate intercept:", event);
         // Handle intercept event (show gate overlay)
       }
     );

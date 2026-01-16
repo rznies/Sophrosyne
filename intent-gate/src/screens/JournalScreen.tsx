@@ -7,12 +7,15 @@ import {
   TouchableOpacity,
   ScrollView,
   Switch,
+  ActivityIndicator,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAppStore } from '../store';
 import { getTriggerApps } from '../db/repository';
 import type { Session, TriggerApp } from '../db/schema';
 import JournalEntryCard from '../components/JournalEntryCard';
+import ErrorBanner from '../components/ErrorBanner';
+import { colors } from '../theme/colors';
 
 const styles = StyleSheet.create({
   container: {
@@ -144,17 +147,24 @@ export default function JournalScreen() {
   ]);
   const [datePreset, setDatePreset] = useState<DatePreset>('all');
   const [triggerApps, setTriggerApps] = useState<TriggerApp[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadTriggerApps();
   }, []);
 
   const loadTriggerApps = async () => {
+    setIsLoading(true);
+    setError(null);
     try {
       const apps = await getTriggerApps();
       setTriggerApps(apps);
-    } catch (error) {
-      console.error('[JournalScreen] Failed to load trigger apps:', error);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to load sessions';
+      setError(message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -338,46 +348,65 @@ export default function JournalScreen() {
         <Text style={styles.headerTitle}>Journal</Text>
       </View>
 
-      {/* Filters */}
-      <View style={styles.filtersContainer}>
-        <TouchableOpacity
-          style={styles.filterToggle}
-          onPress={() => setFiltersExpanded(!filtersExpanded)}
-        >
-          <Text style={styles.filterToggleText}>
-            Filters {filteredSessions.length !== sessions.length && `(${filteredSessions.length})`}
+      {isLoading && (
+        <View style={{ padding: 16, alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={{ marginTop: 12, color: colors.text.secondary }}>
+            Loading sessions...
           </Text>
-          <MaterialIcons
-            name={filtersExpanded ? 'expand-less' : 'expand-more'}
-            size={20}
-            color="#666"
-          />
-        </TouchableOpacity>
-        {filtersExpanded && renderFilterContent()}
-      </View>
+        </View>
+      )}
 
-      {/* Sessions List */}
-      <View style={styles.listContainer}>
-        {filteredSessions.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <MaterialIcons name="book" size={40} color="#ccc" />
-            <Text style={styles.emptyText}>No sessions found</Text>
+      {error && (
+        <View style={{ padding: 16 }}>
+          <ErrorBanner message={error} onRetry={loadTriggerApps} />
+        </View>
+      )}
+
+      {!isLoading && (
+        <>
+          {/* Filters */}
+          <View style={styles.filtersContainer}>
+            <TouchableOpacity
+              style={styles.filterToggle}
+              onPress={() => setFiltersExpanded(!filtersExpanded)}
+            >
+              <Text style={styles.filterToggleText}>
+                Filters {filteredSessions.length !== sessions.length && `(${filteredSessions.length})`}
+              </Text>
+              <MaterialIcons
+                name={filtersExpanded ? 'expand-less' : 'expand-more'}
+                size={20}
+                color="#666"
+              />
+            </TouchableOpacity>
+            {filtersExpanded && renderFilterContent()}
           </View>
-        ) : (
-          <FlatList
-            data={filteredSessions}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <JournalEntryCard
-                session={item}
-                appDisplayName={getAppDisplayName(item.packageName)}
+
+          {/* Sessions List */}
+          <View style={styles.listContainer}>
+            {filteredSessions.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <MaterialIcons name="book" size={40} color="#ccc" />
+                <Text style={styles.emptyText}>No sessions found</Text>
+              </View>
+            ) : (
+              <FlatList
+                data={filteredSessions}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <JournalEntryCard
+                    session={item}
+                    appDisplayName={getAppDisplayName(item.packageName)}
               />
             )}
             scrollEnabled={false}
             nestedScrollEnabled={false}
           />
         )}
-      </View>
+          </View>
+        </>
+      )}
     </View>
   );
 }

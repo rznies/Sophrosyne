@@ -42,7 +42,6 @@ export async function shareCSV(csv: string, filename: string = 'intent-gate-expo
     // This would be called in a component using React Native Share API
     // Import Share from 'react-native' and call Share.share({...})
     // For now, just return a resolved promise
-    console.log(`[export] CSV ready to share: ${filename} (${csv.length} bytes)`);
   } catch (error) {
     console.error('[export] Failed to share CSV:', error);
     throw error;

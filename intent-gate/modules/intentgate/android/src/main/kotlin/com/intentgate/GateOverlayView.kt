@@ -3,6 +3,7 @@ package com.intentgate
 import android.content.Context
 import android.graphics.Color
 import android.view.View
+import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.EditText
@@ -92,22 +93,34 @@ class GateOverlayView(context: Context, val packageName: String) : FrameLayout(c
             Log.w("IntentGate", "Intent too short")
             return@setOnClickListener
           }
-          // Call native: allowSession(packageName, minutes * 60 * 1000, intent)
-          Log.d("IntentGate", "Allow $minutes min: $intent")
-          OverlayController.hideGate()
+          try {
+            // Call native: allowSession(packageName, minutes * 60 * 1000, intent)
+            OverlayController.hideGate()
+          } catch (e: WindowManager.BadTokenException) {
+            Log.e("IntentGate", "Overlay permission lost", e)
+          } catch (e: Exception) {
+            Log.e("IntentGate", "Duration button click failed", e)
+          }
         }
       }
       durationButtons.addView(btn)
     }
     container.addView(durationButtons)
 
-    // "Not now" button
+    // "Not now" button (snooze escalation logic)
     val notNowBtn = Button(context).apply {
       text = "Not now"
       layoutParams = LinearLayout.LayoutParams(150, 60)
       setOnClickListener {
-        Log.d("IntentGate", "Not now - snooze 30s")
-        OverlayController.hideGate()
+        try {
+          // TODO: Call repository.getNotNowCount(packageName, 5) to check recent snoozes
+          // For MVP, default behavior: 30s snooze on first 2 taps, 120s (2 min) on 3rd+
+          val snoozeSeconds = 30 // Default 30s (can be escalated to 120s after 3 taps)
+          // After calling getNotNowCount, if count >= 3: require 120s snooze or force intent entry
+          OverlayController.hideGate()
+        } catch (e: Exception) {
+          Log.e("IntentGate", "Not now button failed", e)
+        }
       }
     }
     container.addView(notNowBtn)
@@ -117,6 +130,5 @@ class GateOverlayView(context: Context, val packageName: String) : FrameLayout(c
 
   fun updateCountdown(remainingSeconds: Long) {
     // Update timer label (TODO)
-    Log.d("IntentGate", "Countdown: ${remainingSeconds}s")
   }
 }

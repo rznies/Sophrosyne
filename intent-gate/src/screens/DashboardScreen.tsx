@@ -6,12 +6,14 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NavigationProp } from '@react-navigation/native';
 import { useAppStore } from '../store';
 import StatusCard from '../components/StatusCard';
 import AnalyticsCard from '../components/AnalyticsCard';
+import { colors, spacing, borderRadius, typography, shadows } from '../theme/colors';
 
 type RootTabParamList = {
   Dashboard: undefined;
@@ -27,105 +29,132 @@ interface Props {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.surface,
   },
   header: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#fff',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: colors.border,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    ...typography.headline,
+    color: colors.text.primary,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
   },
   quickActionsSection: {
-    marginBottom: 20,
+    marginBottom: spacing.xl,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 12,
+    ...typography.bodyMedium,
+    color: colors.text.primary,
+    marginBottom: spacing.md,
   },
   quickActionsGrid: {
     flexDirection: 'row',
-    gap: 12,
+    gap: spacing.md,
   },
   actionButton: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    paddingVertical: 16,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.lg,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    ...shadows.md,
+    minHeight: 56, // Material Design minimum touch target
   },
   actionButtonText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#333',
-    marginTop: 8,
+    ...typography.caption,
+    color: colors.text.primary,
+    marginTop: spacing.sm,
     textAlign: 'center',
   },
   analyticsCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+    ...shadows.md,
   },
   analyticsTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-    marginBottom: 12,
+    ...typography.bodyMedium,
+    color: colors.text.secondary,
+    marginBottom: spacing.md,
   },
   analyticsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   analyticsStat: {
     flex: 1,
   },
   analyticsStatLabel: {
-    fontSize: 12,
-    color: '#999',
-    marginBottom: 4,
+    ...typography.caption,
+    color: colors.text.tertiary,
+    marginBottom: spacing.sm,
   },
   analyticsStatValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2196f3',
+    ...typography.headline,
+    color: colors.primary,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  permissionBanner: {
+    backgroundColor: colors.error,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+    borderRadius: borderRadius.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  permissionBannerText: {
+    ...typography.bodyMedium,
+    color: colors.white,
+    flex: 1,
+  },
+  permissionFixButton: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    marginLeft: spacing.md,
+    minHeight: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  permissionFixButtonText: {
+    ...typography.captionMedium,
+    color: colors.error,
+  },
 });
 
 export default function DashboardScreen({ navigation }: Props) {
-  const { workModeOn } = useAppStore();
+  const { workModeOn, accessibilityEnabled, overlayEnabled } = useAppStore();
+  const [permissionsLost, setPermissionsLost] = useState(false);
+
+  useEffect(() => {
+    const permsMissing = !accessibilityEnabled || !overlayEnabled;
+    setPermissionsLost(permsMissing);
+  }, [accessibilityEnabled, overlayEnabled]);
 
   const handleQuickAction = (screen: keyof RootTabParamList) => {
     navigation.navigate(screen);
+  };
+
+  const handleFixPermissions = () => {
+    navigation.navigate('Settings');
   };
 
   return (
@@ -135,26 +164,41 @@ export default function DashboardScreen({ navigation }: Props) {
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 20 }}>
-        {/* Status Card */}
-        <StatusCard />
+         {/* Permission Recovery Banner */}
+         {permissionsLost && (
+           <View style={styles.permissionBanner}>
+             <Text style={styles.permissionBannerText}>
+              Protection OFF - Tap to fix
+            </Text>
+            <TouchableOpacity
+              style={styles.permissionFixButton}
+              onPress={handleFixPermissions}
+            >
+              <Text style={styles.permissionFixButtonText}>Fix</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+         {/* Status Card */}
+         <StatusCard />
 
         {/* Quick Actions */}
         <View style={styles.quickActionsSection}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.quickActionsGrid}>
             <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => handleQuickAction('Triggers')}
+             style={styles.actionButton}
+             onPress={() => handleQuickAction('Triggers')}
             >
-              <MaterialIcons name="apps" size={28} color="#2196f3" />
-              <Text style={styles.actionButtonText}>Trigger Apps</Text>
+             <MaterialIcons name="apps" size={28} color={colors.primary} />
+             <Text style={styles.actionButtonText}>Trigger Apps</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => handleQuickAction('Journal')}
+             style={styles.actionButton}
+             onPress={() => handleQuickAction('Journal')}
             >
-              <MaterialIcons name="schedule" size={28} color="#4caf50" />
-              <Text style={styles.actionButtonText}>Schedule</Text>
+             <MaterialIcons name="schedule" size={28} color={colors.success} />
+             <Text style={styles.actionButtonText}>Schedule</Text>
             </TouchableOpacity>
           </View>
           <View style={[styles.quickActionsGrid, { marginTop: 12 }]}>
@@ -162,14 +206,14 @@ export default function DashboardScreen({ navigation }: Props) {
               style={styles.actionButton}
               onPress={() => handleQuickAction('Journal')}
             >
-              <MaterialIcons name="book" size={28} color="#ff9800" />
+              <MaterialIcons name="book" size={28} color={colors.warning} />
               <Text style={styles.actionButtonText}>Journal</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionButton}
               onPress={() => handleQuickAction('Settings')}
             >
-              <MaterialIcons name="settings" size={28} color="#9c27b0" />
+              <MaterialIcons name="settings" size={28} color={colors.secondary} />
               <Text style={styles.actionButtonText}>Settings</Text>
             </TouchableOpacity>
           </View>

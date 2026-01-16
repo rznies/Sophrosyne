@@ -18,7 +18,6 @@ export default function App() {
     initDatabase()
       .then((db) => {
         setDatabase(db);
-        console.log('Database initialized');
       })
       .catch((err) => {
         console.error('Failed to initialize database:', err);

@@ -166,7 +166,6 @@ export async function reconcileTriggerApps(): Promise<void> {
   const apps = await getTriggerApps();
   // In production: query PackageManager.getInstalledApplications()
   // Compare with apps in DB, mark stale ones
-  console.log(`[reconcileTriggerApps] Found ${apps.length} apps in DB`);
 }
 
 /**
@@ -306,4 +305,24 @@ export async function getChipUsageStats(): Promise<
     chip: r.reasonSource,
     count: r.count,
   }));
+}
+
+/**
+ * Get snooze count for package in time window
+ * Used to escalate snooze duration after repeated "Not now" taps
+ */
+export async function getNotNowCount(
+  packageName: string,
+  timeWindowMinutes: number
+): Promise<number> {
+  const now = Date.now();
+  const windowStartMs = now - timeWindowMinutes * 60 * 1000;
+
+  const result = await getDb().getAllAsync<{ count: number }>(
+    `SELECT COUNT(*) as count FROM sessions 
+     WHERE packageName = ? AND outcome = 'snoozed' AND tsStartEpochMs >= ?`,
+    [packageName, windowStartMs]
+  );
+
+  return result && result.length > 0 ? result[0].count : 0;
 }
