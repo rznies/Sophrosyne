@@ -146,6 +146,46 @@ export async function removeAllowSession(packageName: string): Promise<void> {
 }
 
 /**
+ * Trigger Apps - Advanced operations
+ */
+
+export interface InstalledApp {
+  packageName: string;
+  displayName: string;
+  icon?: string; // base64 or uri - optional for MVP
+}
+
+/**
+ * Reconcile trigger apps with installed applications
+ * Detects uninstalled apps and marks them (without deletion)
+ * To be enhanced in Phase 3 with native bridge to PackageManager
+ */
+export async function reconcileTriggerApps(): Promise<void> {
+  // TODO: In Phase 3, integrate with native PackageManager
+  // For now, this is a placeholder that verifies DB is healthy
+  const apps = await getTriggerApps();
+  // In production: query PackageManager.getInstalledApplications()
+  // Compare with apps in DB, mark stale ones
+  console.log(`[reconcileTriggerApps] Found ${apps.length} apps in DB`);
+}
+
+/**
+ * Get list of installed applications
+ * Returns apps from native PackageManager (or fallback list for testing)
+ * To be wired with native bridge in Phase 3
+ */
+export async function getInstalledAppList(): Promise<InstalledApp[]> {
+  // TODO: In Phase 3, integrate with native PackageManager via Expo Module
+  // For now, return empty list (will be populated from native bridge)
+  // Example response:
+  // [
+  //   { packageName: "com.youtube.android.tv", displayName: "YouTube" },
+  //   { packageName: "com.spotify.music", displayName: "Spotify" },
+  // ]
+  return [];
+}
+
+/**
  * Analytics queries
  */
 export async function getTodayStats(): Promise<{

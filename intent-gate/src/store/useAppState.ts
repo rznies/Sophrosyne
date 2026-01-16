@@ -14,8 +14,10 @@ export interface AppState {
 
   // Actions
   setWorkMode: (on: boolean) => void;
+  setSelectedTriggerApps: (apps: string[]) => void;
   addTriggerApp: (packageName: string) => void;
   removeTriggerApp: (packageName: string) => void;
+  setScheduleRules: (rules: ScheduleRule[]) => void;
   updateScheduleRules: (rules: ScheduleRule[]) => void;
   updateSessions: (sessions: Session[]) => void;
   updatePermissions: (accessibility: boolean, overlay: boolean) => void;
@@ -35,6 +37,10 @@ export const useAppState = create<AppState>((set) => ({
     set({ workModeOn: on });
   },
 
+  setSelectedTriggerApps: (apps: string[]) => {
+    set({ selectedTriggerApps: apps });
+  },
+
   addTriggerApp: (packageName: string) => {
     set((state) => ({
       selectedTriggerApps: [...state.selectedTriggerApps, packageName],
@@ -47,6 +53,10 @@ export const useAppState = create<AppState>((set) => ({
         (pkg) => pkg !== packageName
       ),
     }));
+  },
+
+  setScheduleRules: (rules: ScheduleRule[]) => {
+    set({ scheduleRules: rules });
   },
 
   updateScheduleRules: (rules: ScheduleRule[]) => {
