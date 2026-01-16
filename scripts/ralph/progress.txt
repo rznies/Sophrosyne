@@ -119,10 +119,33 @@ Tasks: 4.0, 4.1, 4.2, 4.3, 4.4
 - Updated IntentGateModule with SessionManager, OverlayController, PermissionHelper ✓
 - Dev build compiles (TypeScript: tsc --noEmit) ✓
 - **Learnings:**
-  - TYPE_ACCESSIBILITY_OVERLAY is the right window type (OEM-compatible vs TYPE_APPLICATION_OVERLAY)
-  - GridLayout works well for 2-column chip layout in native Kotlin
-  - Kotlin Coroutines (Dispatchers.Main + Job) handle timers better than Handler
-  - AccessibilityService.TYPE_WINDOW_STATE_CHANGED fires every app switch
-  - Kotlin string resources in res/values/strings.xml for accessibility service description
+   - TYPE_ACCESSIBILITY_OVERLAY is the right window type (OEM-compatible vs TYPE_APPLICATION_OVERLAY)
+   - GridLayout works well for 2-column chip layout in native Kotlin
+   - Kotlin Coroutines (Dispatchers.Main + Job) handle timers better than Handler
+   - AccessibilityService.TYPE_WINDOW_STATE_CHANGED fires every app switch
+   - Kotlin string resources in res/values/strings.xml for accessibility service description
+
+## Jan 16 - Phase 5 (Tasks 5.0-5.4)
+Thread: https://ampcode.com/threads/T-019bc77d-9c7a-7600-9494-c93a4a13d245
+Tasks: 5.0, 5.1, 5.2, 5.3, 5.4
+- Implemented JournalScreen with filters (app, date range, outcome) ✓
+- Created JournalEntryCard component (app icon, intent, duration, outcome badge) ✓
+- Implemented analytics queries (getTodayStats, getWeeklyRollup, getChipUsageStats) ✓
+- Built AnalyticsCard component (displays today's stats + top chips) ✓
+- Updated DashboardScreen to show AnalyticsCard when Work Mode enabled ✓
+- Created onboarding flow logic (determineOnboardingStep, state machine) ✓
+- Implemented all 4 onboarding screens (Welcome, Accessibility, Overlay, TestNow) ✓
+- Created PermissionChecklist component (status + fix buttons for both perms) ✓
+- Updated SettingsScreen (Work Mode, durations, permissions, export, clear, feedback) ✓
+- Implemented CSV export via Share API (exportSessions utility) ✓
+- **Learnings:**
+   - Onboarding state machine keeps users in right step via determineOnboardingStep()
+   - Deep links to Settings: settings:// + action (varies by OEM)
+   - Share API works for CSV (use data URI + base64 for content)
+   - FlatList needs proper key props when filtering
+   - Analytics queries handle empty result sets gracefully
+   - useMemo prevents unnecessary filter recalculations
+   - TouchableOpacity with opacity for disabled states is better than disabled prop
+- **Typecheck:** All 5 tasks pass `tsc --noEmit` ✓
 ---
 

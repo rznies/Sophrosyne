@@ -10,8 +10,8 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { NavigationProp } from '@react-navigation/native';
 import { useAppStore } from '../store';
-import { getTodayStats } from '../db/repository';
 import StatusCard from '../components/StatusCard';
+import AnalyticsCard from '../components/AnalyticsCard';
 
 type RootTabParamList = {
   Dashboard: undefined;
@@ -123,28 +123,6 @@ const styles = StyleSheet.create({
 
 export default function DashboardScreen({ navigation }: Props) {
   const { workModeOn } = useAppStore();
-  const [statsLoading, setStatsLoading] = useState(true);
-  const [todayStats, setTodayStats] = useState({
-    interceptCount: 0,
-    allowedSessionCount: 0,
-    totalAllowedMinutes: 0,
-  });
-
-  useEffect(() => {
-    loadStats();
-  }, []);
-
-  const loadStats = async () => {
-    try {
-      setStatsLoading(true);
-      const stats = await getTodayStats();
-      setTodayStats(stats);
-    } catch (error) {
-      console.error('[DashboardScreen] Failed to load stats:', error);
-    } finally {
-      setStatsLoading(false);
-    }
-  };
 
   const handleQuickAction = (screen: keyof RootTabParamList) => {
     navigation.navigate(screen);
@@ -198,27 +176,14 @@ export default function DashboardScreen({ navigation }: Props) {
         </View>
 
         {/* Analytics Card */}
-        {statsLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color="#2196f3" />
-          </View>
+        {workModeOn ? (
+          <AnalyticsCard />
         ) : (
           <View style={styles.analyticsCard}>
-            <Text style={styles.analyticsTitle}>Today's Stats</Text>
-            <View style={styles.analyticsRow}>
-              <View style={styles.analyticsStat}>
-                <Text style={styles.analyticsStatLabel}>Intercepted</Text>
-                <Text style={styles.analyticsStatValue}>{todayStats.interceptCount}</Text>
-              </View>
-              <View style={styles.analyticsStat}>
-                <Text style={styles.analyticsStatLabel}>Allowed</Text>
-                <Text style={styles.analyticsStatValue}>{todayStats.allowedSessionCount}</Text>
-              </View>
-              <View style={styles.analyticsStat}>
-                <Text style={styles.analyticsStatLabel}>Minutes Used</Text>
-                <Text style={styles.analyticsStatValue}>{todayStats.totalAllowedMinutes}</Text>
-              </View>
-            </View>
+            <Text style={styles.analyticsTitle}>Enable Work Mode</Text>
+            <Text style={styles.analyticsStatLabel}>
+              Turn on Work Mode to see analytics and activity stats.
+            </Text>
           </View>
         )}
       </ScrollView>

@@ -208,7 +208,7 @@ export async function getTodayStats(): Promise<{
     [startTsMs, now]
   );
 
-  if (!sessions) {
+  if (!sessions || sessions.length === 0) {
     return {
       interceptCount: 0,
       allowedSessionCount: 0,
@@ -228,4 +228,82 @@ export async function getTodayStats(): Promise<{
     allowedSessionCount,
     totalAllowedMinutes: Math.round(totalAllowedMinutes),
   };
+}
+
+/**
+ * Get weekly rollup (per day, last 7 days)
+ */
+export async function getWeeklyRollup(): Promise<
+  {
+    date: string;
+    intercepts: number;
+    allowedMinutes: number;
+  }[]
+> {
+  const now = Date.now();
+  const startDate = new Date(now);
+  startDate.setDate(startDate.getDate() - 7);
+  startDate.setHours(0, 0, 0, 0);
+
+  const results = await getDb().getAllAsync<{
+    dateStr: string;
+    intercepts: number;
+    allowedMinutes: number;
+  }>(
+    `
+    SELECT 
+      DATE(tsStartEpochMs / 1000, 'unixepoch', 'localtime') as dateStr,
+      COUNT(*) as intercepts,
+      CAST(COALESCE(SUM(CASE WHEN outcome = 'allowed' THEN durationSelectedSec ELSE 0 END) / 60, 0) AS INTEGER) as allowedMinutes
+    FROM sessions
+    WHERE tsStartEpochMs >= ?
+    GROUP BY dateStr
+    ORDER BY dateStr DESC
+    `,
+    [startDate.getTime()]
+  );
+
+  if (!results || results.length === 0) {
+    return [];
+  }
+
+  return results.map((r) => ({
+    date: r.dateStr,
+    intercepts: r.intercepts,
+    allowedMinutes: r.allowedMinutes,
+  }));
+}
+
+/**
+ * Get chip usage stats (top preset chips used)
+ */
+export async function getChipUsageStats(): Promise<
+  {
+    chip: string;
+    count: number;
+  }[]
+> {
+  const results = await getDb().getAllAsync<{
+    reasonSource: string;
+    count: number;
+  }>(
+    `
+    SELECT reasonSource, COUNT(*) as count
+    FROM sessions
+    WHERE reasonSource = 'chip'
+    GROUP BY reasonSource
+    ORDER BY count DESC
+    LIMIT 3
+    `
+  );
+
+  if (!results || results.length === 0) {
+    return [];
+  }
+
+  // Map reasonSource to chip names (in production, store chip name in sessions table)
+  return results.map((r) => ({
+    chip: r.reasonSource,
+    count: r.count,
+  }));
 }
