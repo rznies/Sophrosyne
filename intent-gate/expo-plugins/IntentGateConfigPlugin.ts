@@ -3,7 +3,7 @@ import {
   withAndroidManifest,
 } from "@expo/config-plugins";
 
-export const withIntentGateConfig: ConfigPlugin = (config) => {
+const withIntentGateConfig: ConfigPlugin = (config) => {
   return withAndroidManifest(config, async (config) => {
     const androidManifest = config.modResults;
 
@@ -53,3 +53,5 @@ export const withIntentGateConfig: ConfigPlugin = (config) => {
     return config;
   });
 };
+
+export default withIntentGateConfig;

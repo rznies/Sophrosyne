@@ -105,5 +105,24 @@ Tasks: 3.0, 3.1, 3.2, 3.3
   - Permissions added by plugin don't duplicate if already in manifest (coalesced)
 - **Typecheck:** All TypeScript files pass `tsc --noEmit` ✓
 
+## Jan 16 - Phase 4 (Tasks 4.0-4.4)
+Thread: https://ampcode.com/threads/T-019bc77d-9c7a-7600-9494-c93a4a13d245
+Tasks: 4.0, 4.1, 4.2, 4.3, 4.4
+- Implemented IntentGateAccessibilityService (detects TYPE_WINDOW_STATE_CHANGED) ✓
+- Created PermissionHelper (check Accessibility enabled + service running) ✓
+- Built OverlayController (showGate/hideGate lifecycle) ✓
+- Implemented GateOverlayView (Material Design, 8 chips, duration buttons) ✓
+- Created SessionManager (Kotlin Coroutines timers) ✓
+- Connected AccessibilityService to event emission ✓
+- Added Kotlin Coroutines dependency to build.gradle ✓
+- Created accessibility service metadata XML (@xml/accessibility_service_config) ✓
+- Updated IntentGateModule with SessionManager, OverlayController, PermissionHelper ✓
+- Dev build compiles (TypeScript: tsc --noEmit) ✓
+- **Learnings:**
+  - TYPE_ACCESSIBILITY_OVERLAY is the right window type (OEM-compatible vs TYPE_APPLICATION_OVERLAY)
+  - GridLayout works well for 2-column chip layout in native Kotlin
+  - Kotlin Coroutines (Dispatchers.Main + Job) handle timers better than Handler
+  - AccessibilityService.TYPE_WINDOW_STATE_CHANGED fires every app switch
+  - Kotlin string resources in res/values/strings.xml for accessibility service description
 ---
 
