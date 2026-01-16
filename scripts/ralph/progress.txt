@@ -50,5 +50,60 @@ Task ID: 1.1
 - Native Kotlin tests use Robolectric or instrumented tests
 - Manual verification on device preferred for Accessibility + overlay
 
+## Jan 16 - Setup Phase 1 (Tasks 1.2-1.6)
+Thread: https://ampcode.com/threads/T-019bc77d-9c7a-7600-9494-c93a4a13d245
+Tasks: 1.2, 1.3, 1.4, 1.5, 1.6
+- Implemented SQLite schema with 4 tables (trigger_apps, schedule_rules, sessions, allow_sessions) ✓
+- Created repository layer (CRUD + analytics queries like getTodayStats) ✓
+- Set up Zustand store for global state (workModeOn, permissions, sessions) ✓
+- Built bottom tab navigation (Dashboard, Triggers, Journal, Settings) ✓
+- Created all placeholder screens (4 onboarding + schedule screens) ✓
+- **Learnings:**
+  - expo-sqlite v16+ uses openDatabaseSync (not openDatabase)
+  - All DB operations use async/await with execAsync, getAllAsync, runAsync
+  - Zustand is lightweight and perfect for this app's state needs
+  - Bottom tabs with MaterialIcons work seamlessly
+  - Navigation setup requires NavigationContainer wrapper
+- **Typecheck:** All 5 tasks pass `tsc --noEmit` ✓
+
+## Jan 16 - Phase 2 (Tasks 1.7-2.6)
+Thread: https://ampcode.com/threads/T-019bc77d-9c7a-7600-9494-c93a4a13d245
+Tasks: 1.7, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6
+- Implemented time utilities (minutesToHHMM, isWithinSchedule, getMinutesFromMidnight, secondsToMMSS) ✓
+- Added reconcileTriggerApps() + getInstalledAppList() to repository (placeholders for Phase 3 native bridge) ✓
+- Created TriggerAppsList component (FlatList, search filter, toggle switch, "Not installed" badge) ✓
+- Implemented TriggersScreen with reconciliation on mount + app count header ✓
+- Built shouldGateNow() logic in rules.ts (workMode OR schedule AND selected AND not in allow_session) ✓
+- Created ScheduleScreen (7 weekdays, add/remove time windows, HH:MM time inputs) ✓
+- Built StatusCard component (Work Mode toggle, protection badge [ON/OFF/LIMITED]) ✓
+- Updated DashboardScreen (StatusCard + Quick Actions grid + Today's Stats analytics) ✓
+- Created store/index.ts to export useAppStore (alias for useAppState) ✓
+- Added setSelectedTriggerApps + setScheduleRules to Zustand store ✓
+- **Learnings:**
+  - FlatList with search filter works well for large app lists
+  - Time window validation needs HH:MM format checking (0-23 hours, 0-59 minutes)
+  - Zustand subscriptions seamlessly trigger re-renders on state changes
+  - StatusCard badge colors (green/red/amber) use Material Design conventions
+  - Analytics cards display dummy data on load (can wire real data on refresh)
+- **Typecheck:** All 8 tasks pass `tsc --noEmit` ✓
+
+## Jan 16 - Phase 3 (Tasks 3.0-3.3)
+Thread: https://ampcode.com/threads/T-019bc77d-9c7a-7600-9494-c93a4a13d245
+Tasks: 3.0, 3.1, 3.2, 3.3
+- Created IntentGateModule.kt (Expo Module skeleton with Promise-based functions) ✓
+- Created config plugin (modifies AndroidManifest with service declaration + permissions) ✓
+- Created accessibility service metadata XML (@xml/accessibility_service_config) ✓
+- Created native bridge with TypeScript types (IntentGateNative, event listeners, hooks) ✓
+- Updated app.config.ts with proper Android/iOS package identifiers ✓
+- Dev build prepares successfully (`npx expo prebuild --clean`) ✓
+- AndroidManifest.xml contains service declaration with intent filters + meta-data ✓
+- **Learnings:**
+  - Expo Modules API uses Promise-based functions (no async/await syntax in module definition)
+  - Config plugins modify manifest without ejecting (withAndroidManifest works at prebuild time)
+  - Native event emitter works with NativeEventEmitter from react-native
+  - Prebuild clears kotlin/ and uses java/ directory for all .kt files
+  - Permissions added by plugin don't duplicate if already in manifest (coalesced)
+- **Typecheck:** All TypeScript files pass `tsc --noEmit` ✓
+
 ---
 
