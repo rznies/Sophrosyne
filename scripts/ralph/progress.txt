@@ -10,6 +10,20 @@ Task ID: 1.0
 - Initial commit with project files ✓
 - Ready for implementation ✓
 
+## Jan 16 - Initialize Expo Project
+Thread: https://ampcode.com/threads/T-019bc77d-9c7a-7600-9494-c93a4a13d245
+Task ID: 1.1
+- Created new Expo project with TypeScript ✓
+- Installed all dependencies (zustand, navigation, sqlite, gesture-handler) ✓
+- Created /src directory structure (screens, components, store, native, db, utils) ✓
+- App compiles and runs successfully ✓
+- **Learnings for future iterations:**
+  - Expo 54+ uses expo-sqlite@16 (modern API)
+  - Bottom tabs navigation uses @react-navigation v7
+  - TypeScript strict mode enabled by default via expo/tsconfig.base
+  - Expo Router is baked in with file-based routing
+  - Added typecheck script to package.json for CI validation
+
 ## Codebase Patterns
 
 ### Expo + React Native Setup
