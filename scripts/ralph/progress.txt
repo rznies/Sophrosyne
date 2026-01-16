@@ -1,0 +1,33 @@
+# Build Progress Log
+Started: Jan 16, 2026
+Feature: Intent Gate MVP - Production-Ready Android App
+Parent Task: intent-gate-mvp-parent
+
+## Codebase Patterns
+
+### Expo + React Native Setup
+- Bottom tab navigation via @react-navigation/bottom-tabs
+- Zustand for lightweight global state (workMode, perms, sessions)
+- expo-sqlite for JS-side DB reads (expo-sqlite integration pattern)
+- Directory structure: /src/screens, /src/components, /src/store, /src/native, /src/db, /src/utils
+
+### Native Integration (Kotlin)
+- Expo Modules API for type-safe native bridge
+- Config plugins modify AndroidManifest without ejecting
+- Single-writer pattern: Native (Room) owns DB writes, JS reads only
+- AccessibilityService listens TYPE_WINDOW_STATE_CHANGED events
+- TYPE_ACCESSIBILITY_OVERLAY for overlay window (more OEM-compatible than TYPE_APPLICATION_OVERLAY)
+- Kotlin Coroutines for timer management (not JS timers)
+
+### Repository Pattern
+- Async CRUD functions for SQLite (getTriggerApps, addTriggerApp, etc.)
+- Analytics queries computed on-demand (getTodayStats, getWeeklyRollup)
+- All DB operations return Promise<T>
+
+### Testing
+- expo-sqlite doesn't have built-in mocking, test against real DB
+- Native Kotlin tests use Robolectric or instrumented tests
+- Manual verification on device preferred for Accessibility + overlay
+
+---
+
